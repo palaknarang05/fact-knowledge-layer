@@ -26,14 +26,14 @@ st.title("📚 Fact Knowledge Layer")
 st.caption("Upload PDFs → extract grounded facts → surface corroboration, contradiction, and context.")
 
 TYPE_BADGE = {
-    "CORROBORATED": "🟢 CORROBORATED",
-    "CONTRADICTION": "🔴 CONTRADICTION",
-    "RESOLVED_BY_CONTEXT": "🟡 RESOLVED_BY_CONTEXT",
-    "EXTRACTION_FAILURE": "⚪ EXTRACTION_FAILURE",
+    "CORROBORATED": " CORROBORATED",
+    "CONTRADICTION": " CONTRADICTION",
+    "RESOLVED_BY_CONTEXT": " RESOLVED_BY_CONTEXT",
+    "EXTRACTION_FAILURE": " EXTRACTION_FAILURE",
 }
 
 tab_upload, tab_facts, tab_relationships, tab_failures = st.tabs(
-    ["⬆️ Upload", "🔎 Facts Explorer", "🔗 Fact Relationships", "⚠️ Extraction Failures"]
+    [" Upload", " Facts Explorer", " Fact Relationships", " Extraction Failures"]
 )
 
 # ---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ with tab_upload:
                     # backend never 500s on a bad file, so this always
                     # renders instead of the UI crashing.
                     st.error(
-                        f"⚠️ **Extraction Failure — {summary['filename']}**: "
+                        f" **Extraction Failure — {summary['filename']}**: "
                         f"{summary.get('error') or 'Could not extract any facts from this document.'}\n\n"
                         "See the **Extraction Failures** tab for details."
                     )
@@ -140,7 +140,7 @@ with tab_facts:
     with col2:
         entity_filter = st.text_input("Filter by entity contains (optional)", key="entity_filter")
     with col3:
-        ungrounded_only = st.checkbox("Show only ⚠️ ungrounded facts", key="ungrounded_only")
+        ungrounded_only = st.checkbox("Show only ungrounded facts", key="ungrounded_only")
 
     params = {}
     if doc_filter:
@@ -162,7 +162,7 @@ with tab_facts:
         # Every fact's evidence (exact quote + page) is shown prominently,
         # not tucked away - this is the traceability the assignment scores.
         title = f"**{f['entity']}** — {f['metric_or_claim']}  ·  {f['value'] or ''} {f['unit'] or ''}"
-        title += "  ·  ✅ grounded" if f["grounded"] else "  ·  ⚠️ UNGROUNDED"
+        title += "  ·   grounded" if f["grounded"] else "  ·   UNGROUNDED"
         with st.expander(title):
             if not f["grounded"]:
                 st.warning(
@@ -211,7 +211,7 @@ with tab_relationships:
             cols = st.columns(len(rel["facts"]) or 1)
             for col, f in zip(cols, rel["facts"]):
                 with col:
-                    grounded_tag = "✅" if f["grounded"] else "⚠️ ungrounded"
+                    grounded_tag = "" if f["grounded"] else " ungrounded"
                     st.markdown(f"**Source:** {f['source_filename']} · **page {f['page_number']}** · {grounded_tag}")
                     st.markdown(f"*{f['entity']} — {f['metric_or_claim']}*")
                     st.markdown(f"{f['value'] or ''} {f['unit'] or ''} {('(' + f['time_period'] + ')') if f['time_period'] else ''}")

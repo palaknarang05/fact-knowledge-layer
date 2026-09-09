@@ -22,7 +22,9 @@ Pipeline per batch of new facts:
   5. Relationships are deduped by a stable `cluster_key` (sorted fact_ids)
      so re-running reconciliation after adding new documents only proposes
      genuinely new relationships, never duplicates old ones.
+
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -33,18 +35,19 @@ from openai import AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from . import config
-from .models import Fact, FactRelationship, ReconciliationResult, RelationshipType
+from .models import Fact, FactRelationship, RelationshipType, ReconciliationResult
 
-_chroma_client = None
 _openai_client: AsyncOpenAI | None = None
-
+_chroma_client: chromadb.PersistentClient | None = None
 
 def get_openai_client() -> AsyncOpenAI:
     global _openai_client
     if _openai_client is None:
+        if not config.OPENAI_API_KEY:
+            raise ValueError("OPENAI_API_KEY is missing from .env")
+        # Securely routes to OpenAI for gpt-4o-mini
         _openai_client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
     return _openai_client
-
 
 def get_collection():
     global _chroma_client
@@ -53,6 +56,8 @@ def get_collection():
     return _chroma_client.get_or_create_collection(
         name=config.CHROMA_COLLECTION, metadata={"hnsw:space": "cosine"}
     )
+
+# ... (Keep the rest of your embed_texts, index_facts, and reconciliation logic the same below this point) ...
 
 
 @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(4))

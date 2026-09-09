@@ -32,6 +32,24 @@ def new_id(prefix: str) -> str:
 # ---------------------------------------------------------------------------
 # LLM-facing: fact extraction
 # ---------------------------------------------------------------------------
+class ExtraAttribute(BaseModel):
+    """One free-form key/value attribute.
+
+    OpenAI's structured-outputs (`response_format=<pydantic model>`) mode
+    rejects genuinely open-ended maps (`Dict[str, str]`) at the API level -
+    it requires every object's `properties` to be enumerated, so a schema
+    with `additionalProperties` set to anything other than `false` is
+    rejected with a 400 "Invalid schema for response_format" error (this is
+    what was surfacing as root cause #3: schema validation/parsing errors
+    during extraction). A list of fixed-shape key/value objects gets the
+    same "attach whatever attributes this fact needs" flexibility -
+    the dynamic-schema requirement - while staying strict-schema legal.
+    """
+
+    key: str = Field(..., description="Attribute name, e.g. 'segment', 'currency_basis', 'director_status'.")
+    value: str = Field(..., description="Attribute value as a string.")
+
+
 class FactLLM(BaseModel):
     """One atomic fact as the extraction model returns it, pre-storage."""
 
@@ -43,7 +61,7 @@ class FactLLM(BaseModel):
     context: str = Field(..., description="One or two sentences of plain-language context making the fact self-contained without re-reading the source.")
     exact_quote: str = Field(..., description="A verbatim substring copied exactly from the source text that supports this fact. Must be copyable character-for-character from the provided chunk.")
     confidence: float = Field(..., ge=0.0, le=1.0, description="Model's confidence that this fact was extracted correctly and is grounded in the quote.")
-    extra: Dict[str, str] = Field(default_factory=dict, description="Optional additional attributes specific to this fact's domain that don't fit the fixed fields above.")
+    extra: List[ExtraAttribute] = Field(default_factory=list, description="Optional additional key/value attributes specific to this fact's domain that don't fit the fixed fields above.")
 
 
 class ExtractionResult(BaseModel):
