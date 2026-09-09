@@ -48,15 +48,6 @@ Interactive API docs: `http://localhost:8000/docs`.
 Everything persists to `./data/` (SQLite DB + a persistent Chroma index), so
 stopping and restarting the backend does not lose ingested facts.
 
-## Video Demo
-
-`<link to a ≤3 minute demo video — add before submitting>`
-
-Demo shows: uploading a PDF, the extracted facts view with source quotes,
-and one example each of CORROBORATED, CONTRADICTION, RESOLVED_BY_CONTEXT,
-and an extraction failure, using the provided `delhivery/` and
-`india-macroeconomy/` starter datasets.
-
 ## Approach
 
 **Pipeline shape:** PDF → per-page text (`pdfplumber`) → page-aware chunks
